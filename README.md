@@ -119,6 +119,97 @@ Accepts JSON data and returns it with timestamp.
 }
 ```
 
+### 5. **S3 File Upload Endpoint**
+```
+POST /upload
+```
+Upload files to AWS S3 bucket. Requires multipart/form-data with a file field.
+
+**Request:**
+- Method: POST
+- Content-Type: multipart/form-data
+- Field: `file` (the file to upload)
+- Max file size: 10MB
+- Supported MIME types: image/jpeg, image/png, image/gif, application/pdf, text/plain, application/json
+
+**Example using curl:**
+```bash
+curl -X POST http://localhost:3000/upload \
+  -F "file=@/path/to/your/file.jpg"
+```
+
+**Response:**
+```json
+{
+  "message": "File uploaded successfully to S3",
+  "fileName": "file.jpg",
+  "fileSize": 204800,
+  "mimeType": "image/jpeg",
+  "s3Key": "uploads/1708345200000-file.jpg",
+  "s3Location": "https://your-bucket.s3.amazonaws.com/uploads/1708345200000-file.jpg",
+  "bucket": "your-bucket-name",
+  "timestamp": "2026-02-19T10:30:00.000Z"
+}
+```
+
+### 6. **Upload Status Endpoint**
+```
+GET /upload/status
+```
+Check S3 upload configuration and supported file types.
+
+**Response:**
+```json
+{
+  "uploadEndpoint": "/upload",
+  "s3Configured": true,
+  "bucket": "your-bucket-name",
+  "region": "us-east-1",
+  "maxFileSize": "10MB",
+  "supportedMimeTypes": [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "application/pdf",
+    "text/plain",
+    "application/json"
+  ]
+}
+```
+
+## S3 Configuration
+
+To enable file uploads to AWS S3, configure your environment variables:
+
+### 1. Create S3 Bucket
+```bash
+aws s3 mb s3://your-bucket-name --region us-east-1
+```
+
+### 2. Create IAM User with S3 Access
+- Go to AWS IAM Console
+- Create a new user with S3 full access or a custom policy
+- Create access keys for the user
+
+### 3. Update Environment Variables
+Edit `.env` (development) or `.env.production` (production):
+```
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_REGION=us-east-1
+S3_BUCKET_NAME=your-bucket-name
+```
+
+### 4. Test S3 Upload
+```bash
+# Check upload status
+curl http://localhost:3000/upload/status
+
+# Upload a file
+curl -X POST http://localhost:3000/upload \
+  -F "file=@/path/to/file.jpg"
+```
+
 ## Deployment on AWS EC2
 
 ### 1. Connect to Your EC2 Instance
